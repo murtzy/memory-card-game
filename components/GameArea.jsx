@@ -1,31 +1,42 @@
 // import { useEffect, useState } from 'react';
 import { Card } from './Card';
-import { GameHeader } from './GameHeader';
+import { GameHeader, Moves, Score, Miss, ResetBtn } from './GameHeader';
 import { WinMessage } from './WinMessage';
 import { useGameLogic } from '../context/GameCardContext';
-import { cardValues } from '../src/cardValues';
+import { useSharedGame } from '../context/SharedGameContext';
+// import { cardValues } from '../src/cardValues';
 
-export const GameArea = () => {
+export const MovesMiss = ({ moves, miss }) => {
+  return (
+    <>
+      <Moves moves={moves} />
+      <Miss miss={miss} />
+    </>
+  );
+};
+
+export const GameArea = ({ showAllStats = true, showMsg = true }) => {
   const {
     cards,
     score,
     moves,
     initializeGame,
-    completedGame,
     handleClick,
     miss,
-  } = useGameLogic(cardValues);
+  } = useGameLogic();
+  const { completedGame } = useSharedGame();
 
   return (
     <div className="game-area">
-      <GameHeader
-        score={score}
-        moves={moves}
-        miss={miss}
-        reset={initializeGame}
-      />
+      <GameHeader>
+        <div className="stats">
+          <Score score={score} />
+          {showAllStats && <MovesMiss moves={moves} miss={miss} />}
+        </div>
+        {showAllStats && <ResetBtn reset={initializeGame} />}
+      </GameHeader>
 
-      {completedGame && <WinMessage moves={moves} />}
+      {completedGame && showMsg && <WinMessage moves={moves} />}
 
       <div className="cards-grid">
         {cards.map((card) => (

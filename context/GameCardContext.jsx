@@ -1,19 +1,22 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable react-refresh/only-export-components */
 import { useContext, createContext, useState, useEffect } from 'react';
 import { cardValues } from '../src/cardValues';
+import { useSharedGame } from './SharedGameContext';
 
 const GameCardContext = createContext();
 
-export const GameCarcProvider = ({ children }) => {
+export const GameCardProvider = ({ children }) => {
+  const { completedGame, completedGameRef, setCompletedGame, compWin } = useSharedGame();
+
   const [cards, setCards] = useState([]);
   const [flippedCards, setFlippedCards] = useState([]);
-  const [MatchedCards, setMatchedCards] = useState([]);
+  const [matchedCards, setMatchedCards] = useState([]);
   const [locked, setLocked] = useState(false);
   const [score, setScore] = useState(0);
   const [moves, setMoves] = useState(0);
   const [miss, setMiss] = useState(0);
   const [history, setHistory] = useState([]);
-
   const shuffledArray = (array) => {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -39,6 +42,7 @@ export const GameCarcProvider = ({ children }) => {
     setScore(0);
     setMoves(0);
     setMiss(0);
+    setCompletedGame(false)
   };
 
   useEffect(() => {
@@ -51,7 +55,8 @@ export const GameCarcProvider = ({ children }) => {
       locked ||
       cardClicked.isFlipped ||
       cardClicked.isMatched ||
-      flippedCards.length === 2
+      flippedCards.length === 2 ||
+      compWin
     ) {
       return;
     }
@@ -79,11 +84,11 @@ export const GameCarcProvider = ({ children }) => {
 
       if (firstCard.value === cardClicked.value) {
         setLocked(true); // terkunci
-        // setMatchedCards((prev) => [...prev, firstCard.id, cardClicked.id]);
-        // setScore((prev) => prev + 1);
         setTimeout(() => {
+          // setMatchedCards((prev) => [...prev, firstCard.id, cardClicked.id]);
+          // setScore((prev) => prev + 1);
           const newMatchedCards = [
-            ...MatchedCards,
+            ...matchedCards,
             firstCard.id,
             cardClicked.id,
           ];
@@ -116,6 +121,7 @@ export const GameCarcProvider = ({ children }) => {
             setHistory((prev) =>
               [entry, ...prev].sort((a, b) => a.moves - b.moves)
             );
+            setCompletedGame(true);
           }
         }, 500);
       } else {
@@ -150,6 +156,9 @@ export const GameCarcProvider = ({ children }) => {
         miss,
         history,
         setHistory,
+        completedGame,
+        completedGameRef,
+        setCompletedGame,
       }}
     >
       {children}
